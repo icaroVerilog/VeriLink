@@ -303,5 +303,5 @@ interfaceGenerator = InterfaceGenerator(parameters)
 src = interfaceGenerator.execute()
 
 
-with open("interface2.v", "w", encoding="utf-8") as arquivo:
+with open("interface.v", "w", encoding="utf-8") as arquivo:
     arquivo.write(src)
