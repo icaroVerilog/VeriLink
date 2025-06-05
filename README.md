@@ -4,7 +4,7 @@
 Verilink is an open-source project designed to generate interfaces between Verilog modules in order to maximize the utilization of input bits, thereby avoiding the underuse of data transfer resources, which are often the main limiting factor in most devices. Fully modular in design, it allows the creation of a modular interface that efficiently transfers data from a source with a larger bit width to multiple destinations that use a smaller bit width.
 
 
-![Interface Architecture Diagram](https://github.com/icaroVerilog/VeriLink/blob/main/images/architecture_diagram.png)
+![Interface Architecture Diagram](https://github.com/icaroVerilog/VeriLink/blob/main/images/architecture.png)
 
 
 ## Utilization
