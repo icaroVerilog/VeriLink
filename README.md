@@ -6,7 +6,7 @@ Verilink is an open-source project designed to generate interfaces between Veril
 
 ## Architecture 
 
-For a given input bit width, the software calculates how many outputs with the specified output bit width can be driven. The image below illustrates a use case where the input has 16 bits, but the receiving module only requires 10 bits. In a typical scenario, this would result in 6 bits being underutilized. In this case, however, the interface stores these bits so that another instance or even the same one, depending on the design can be supplied with data, thereby increasing the circuit's throughput.
+For a given input bit width, the software calculates how many outputs with the specified output bit width can be driven. The image below illustrates a use case where the input has 16 bits, but the receiving module only requires 10 bits. In a typical scenario, this would result in 6 bits being underutilized. In this case, however, the interface stores these bits so that another instance, depending on the design can be supplied with data, thereby increasing the circuit's throughput.
 
 
 ![Interface Architecture Diagram](https://github.com/icaroVerilog/VeriLink/blob/main/images/architecture.png)
