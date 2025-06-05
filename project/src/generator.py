@@ -39,7 +39,7 @@ class ConstructGenerator:
             cardinality = cardinality + " "
 
         if (width > 1):
-            return f"{cardinality}wire [0:{width-1}] {name};\n"
+            return f"{cardinality}wire [{width-1}:0] {name};\n"
         else:
             return f"{cardinality}wire {name};\n"
     
@@ -55,6 +55,9 @@ class ConstructGenerator:
     def generate_atribution(self, l_value, r_value, type):
         return f"{l_value} {type} {r_value};"
     
+    # def generate_instantiation(self):
+    #     return "module"
+
     def generate_always(self, edge, body):
 
         if (edge == "p"):
