@@ -95,7 +95,7 @@ class InterfaceGenerator(ConstructGenerator):
         src = "module interface (\n"
         src += ind(1) + "clk,\n"
         src += ind(1) + "rst,\n"
-        src += ind(1) + "data,\n"
+        src += ind(1) + "data\n"
         src += ");"
 
 
