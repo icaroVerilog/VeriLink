@@ -39,7 +39,7 @@ class ConstructGenerator:
             cardinality = cardinality + " "
 
         if (width > 1):
-            return f"{cardinality}wire [0:{width-1}] {name};\n"
+            return f"{cardinality}wire [{width-1}:0] {name};\n"
         else:
             return f"{cardinality}wire {name};\n"
     
@@ -55,6 +55,9 @@ class ConstructGenerator:
     def generate_atribution(self, l_value, r_value, type):
         return f"{l_value} {type} {r_value};"
     
+    # def generate_instantiation(self):
+    #     return "module"
+
     def generate_always(self, edge, body):
 
         if (edge == "p"):
@@ -92,19 +95,21 @@ class InterfaceGenerator(ConstructGenerator):
         src = "module interface (\n"
         src += ind(1) + "clk,\n"
         src += ind(1) + "rst,\n"
-        src += ind(1) + "data,\n"
+        src += ind(1) + "data_in\n"
         src += ");"
 
 
         src += break_line()
         src += ind(1) + generator.generate_wire("clk", 1, "input")
         src += ind(1) + generator.generate_wire("rst", 1, "input")
-        src += ind(1) + generator.generate_wire("data", self.src_bw, "input")
+        src += ind(1) + generator.generate_wire("data_in", self.src_bw, "input")
         src += break_line()
 
         for index in range(self.__buffer_qnt):
             src += ind(1) + generator.generate_register(f"buffer{index}", int(parameters["destination_bitwidth"]), "")
         src += ind(1) + generator.generate_register(f"buffer_aux", int(parameters["destination_bitwidth"]), "")
+        src += break_line()
+        src += ind(1) + generator.generate_register("valid_data", self.__buffer_qnt)
         src += break_line()
         src += self.generate_always("p")
         src += "endmodule"
@@ -223,15 +228,15 @@ class InterfaceGenerator(ConstructGenerator):
                 if (carry == 0):
                     upper_bit = (lower_bit + conf[index][1]) - 1
                     if (self.__buffers_already_assigned()):
-                        src += ind(4) + f"buffer_aux <= data[{upper_bit}:{lower_bit}];\n"
+                        src += ind(4) + f"buffer_aux <= data_in[{upper_bit}:{lower_bit}];\n"
                         carry = upper_bit - lower_bit
                         carry_lower_bit = lower_bit
                     else:
                         if (simple_carry != 0):
-                            src += ind(4) + f"buffer{conf[index][0]}[{self.dest_bw - 1}:{simple_carry}] <= data[{upper_bit}:{lower_bit}];\n"
+                            src += ind(4) + f"buffer{conf[index][0]}[{self.dest_bw - 1}:{simple_carry}] <= data_in[{upper_bit}:{lower_bit}];\n"
                             simple_carry = 0
                         else:
-                            src += ind(4) + f"buffer{conf[index][0]} <= data[{upper_bit}:{lower_bit}];\n"
+                            src += ind(4) + f"buffer{conf[index][0]} <= data_in[{upper_bit}:{lower_bit}];\n"
                         
                         if (((upper_bit - lower_bit + 1) != self.dest_bw) and (index == len(conf) - 1)):
                             simple_carry = upper_bit - lower_bit + 1
@@ -240,22 +245,25 @@ class InterfaceGenerator(ConstructGenerator):
                 else:
                     upper_bit = (lower_bit + conf[index][1]) - 1
                     if (self.__buffers_already_assigned()):
-                        src += ind(4) + f"buffer_aux <= data[{upper_bit}:{lower_bit}];\n"
+                        src += ind(4) + f"buffer_aux <= data_in[{upper_bit}:{lower_bit}];\n"
                         carry = upper_bit - lower_bit
                         carry_lower_bit = lower_bit
                     else:
                         carry_lower_bit = 0
-                        src += ind(4) + f"buffer{conf[index][0]} <= {{buffer_aux[{carry_lower_bit + carry}:{carry_lower_bit}], data[{upper_bit}:{lower_bit}]}};\n"
+                        src += ind(4) + f"buffer{conf[index][0]} <= {{buffer_aux[{carry_lower_bit + carry}:{carry_lower_bit}], data_in[{upper_bit}:{lower_bit}]}};\n"
                         carry = 0
                     lower_bit = upper_bit + 1
                 self.__buffer_full[conf[index][0]] = self.__buffer_full[conf[index][0]] + conf[index][1]
             
+            valid_data_conf = ""
             for index in range(self.__buffer_qnt):
                 if (self.__buffer_full[index] >= self.dest_bw):
-                    src += ind(4) + f"valid_data{index} <= 1'b1;\n"
+                    valid_data_conf = valid_data_conf + "1"
                     self.__buffer_full[index] = self.__buffer_full[index] - self.dest_bw
                 else:
-                    src += ind(4) + f"valid_data{index} <= 1'b0;\n"
+                    valid_data_conf = valid_data_conf + "0"
+            src += ind(4) + f"valid_data <= {self.__buffer_qnt}'b{valid_data_conf};\n"
+
 
             self.__assigned_buffers = []
             
@@ -281,8 +289,7 @@ class InterfaceGenerator(ConstructGenerator):
             always_src += ind(3) + f"buffer{index} <= {self.dest_bw}'b{generator.to_bin(0, self.dest_bw)};\n"
         if (self.src_bw % self.dest_bw != 0):
             always_src += ind(3) + f"buffer_aux <= {self.dest_bw}'b{generator.to_bin(0, self.dest_bw)};\n"
-        for index in range(self.__buffer_qnt):
-            always_src += ind(3) + f"valid_data{index} <= 1'b0;\n"
+        always_src += ind(3) + f"valid_data <= {self.__buffer_qnt}'b{generator.to_bin(0, self.__buffer_qnt)};\n"
 
         always_src += ind(3) + f"counter <= ç'b*;\n"
         always_src += ind(2) + "end\n"

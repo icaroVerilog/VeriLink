@@ -5,7 +5,7 @@ module interface (
 );
 	input wire clk;
 	input wire rst;
-	input wire [0:15] data;
+	input wire [15:0] data;
 
 	reg [9:0] buffer0;
 	reg [9:0] buffer1;
