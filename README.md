@@ -19,4 +19,5 @@ Verilink requires three flags for its operation:
 |----------------|-------------------------------|-----------------------------|
 |-s							 |specifies the number of bits to be received by the interface module        |Integer            |
 |-d          		 |specifies the number of bits to be sent to the destination modules            |Integer          |
+|-o          		 |specifies the number of output bits            |Integer          |
 |-e              |sets the activation edge of the module, with possible values being `p` (positive edge) and `n` (negative edge)|Character

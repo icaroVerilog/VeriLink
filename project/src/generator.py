@@ -15,6 +15,7 @@ class ParameterReader:
         self.__parameters = {
             "source_bitwidth": None, 
             "destination_bitwidth": None,
+            "output_bitwidth": None,
             "trigger_edge": "p"
         }
 
@@ -26,6 +27,8 @@ class ParameterReader:
                 self.__parameters["source_bitwidth"] = parameters[index+1]
             if (parameters[index] == "-d" and parameters[index+1].isdigit()):
                 self.__parameters["destination_bitwidth"] = parameters[index+1]
+            if (parameters[index] == "-o" and parameters[index+1].isdigit()):
+                self.__parameters["output_bitwidth"] = parameters[index+1]
             if (parameters[index] == "-e"):
                 if (parameters[index+1] != "p" and parameters[index+1] != "n"):
                     print("ERRO")
@@ -90,12 +93,28 @@ class InterfaceGenerator(ConstructGenerator):
         self.__counter_needed_bw = 0
         self.src_bw = int(parameters["source_bitwidth"])
         self.dest_bw = int(parameters["destination_bitwidth"])
+        self.out_bw = int(parameters["output_bitwidth"])
 
     def execute(self):
-        src = "module interface (\n"
+
+        horizontal_board = ""
+        horizontal_board += "//     \u2554"
+        horizontal_board += "\u2550" * 48
+        horizontal_board += "\u2557\n"
+        horizontal_board += "//     \u2551  This code is licensed under the MIT License.  \u2551\n"
+        horizontal_board += "//     \u2551  Modify this module according to your needs.   \u2551\n"
+        horizontal_board += "//     \u255A"
+        horizontal_board += "\u2550" * 48
+        horizontal_board += "\u255D\n"
+        horizontal_board += "\n\n"
+
+        src = ""
+        src += horizontal_board
+        src += "module interface (\n"
         src += ind(1) + "clk,\n"
         src += ind(1) + "rst,\n"
-        src += ind(1) + "data_in\n"
+        src += ind(1) + "data_in,\n"
+        src += ind(1) + "data_out\n"
         src += ");"
 
 
@@ -104,14 +123,18 @@ class InterfaceGenerator(ConstructGenerator):
         src += ind(1) + generator.generate_wire("rst", 1, "input")
         src += ind(1) + generator.generate_wire("data_in", self.src_bw, "input")
         src += break_line()
+        src += ind(1) + generator.generate_wire("data_out", self.out_bw, "output")
+        src += break_line()
 
         for index in range(self.__buffer_qnt):
             src += ind(1) + generator.generate_register(f"buffer{index}", int(parameters["destination_bitwidth"]), "")
         src += ind(1) + generator.generate_register(f"buffer_aux", int(parameters["destination_bitwidth"]), "")
         src += break_line()
         src += ind(1) + generator.generate_register("valid_data", self.__buffer_qnt)
+        src += ind(1) + "`"
         src += break_line()
         src += self.generate_always("p")
+        src = src.replace("`",generator.generate_register("counter", self.__counter_needed_bw))
         src += "endmodule"
         return src
     
